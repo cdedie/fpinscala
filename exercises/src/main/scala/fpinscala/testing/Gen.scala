@@ -22,7 +22,10 @@ object Prop {
   def forAll[A](gen: Gen[A])(f: A => Boolean): Prop = ???
 }
 
-case class Gen[A](sample: State[RNG, A])
+case class Gen[+A](sample: State[RNG, A]) {
+  def flatMap[B](f: A => Gen[B]): Gen[B] = Gen(sample.flatMap(a => f(a).sample))
+  def listOfN(size: Gen[Int]): Gen[List[A]] = size.flatMap(i => Gen(State.sequence(List.fill(i)(sample))))
+}
 
 object Gen {
   def choose(start: Int, stopExclusive: Int): Gen[Int] = Gen(State(RNG.rangeInt(start, stopExclusive)))
