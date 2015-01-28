@@ -28,6 +28,7 @@ case class Gen[+A](sample: State[RNG, A]) {
 }
 
 object Gen {
+  def union[A](g1: Gen[A], g2: Gen[A]): Gen[A] = Gen(State(RNG.boolean)).flatMap(b => if (b) g1 else g2)
   def choose(start: Int, stopExclusive: Int): Gen[Int] = Gen(State(RNG.rangeInt(start, stopExclusive)))
   def unit[A](a: => A): Gen[A] = Gen(State.unit(a))
   def boolean: Gen[Boolean] = Gen(State(RNG.boolean))
