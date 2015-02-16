@@ -26,6 +26,21 @@ trait Stream[+A] {
   def forAll(p: A => Boolean): Boolean = sys.error("todo")
 
   def startsWith[B](s: Stream[B]): Boolean = sys.error("todo")
+
+  def zipWith[B,C](s2: Stream[B])(f: (A,B) => C): Stream[C] =
+    unfold((this, s2)) {
+      case (Cons(h1,t1), Cons(h2,t2)) =>
+        Some((f(h1(), h2()), (t1(), t2())))
+      case _ => None
+    }
+
+  // special case of `zip`
+  def zip[B](s2: Stream[B]): Stream[(A,B)] =
+    zipWith(s2)((_,_))
+
+  def map[B](f: A => B): Stream[B] =
+    foldRight(empty[B])((h,t) => cons(f(h), t))
+
 }
 case object Empty extends Stream[Nothing]
 case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
